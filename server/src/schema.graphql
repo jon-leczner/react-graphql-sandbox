@@ -1,0 +1,73 @@
+type Query {
+  # info: String!
+  feed(
+    # filter: String
+    skip: Int
+    take: Int
+    orderBy: ToDoOrderByInput
+  ): Feed!
+}
+
+type Mutation {
+  post(description: String!): ToDo!
+  signup(
+    email: String!
+    password: String!
+    name: String!
+  ): AuthPayload
+  login(email: String!, password: String!): AuthPayload
+}
+
+type Subscription {
+  newToDo: ToDo
+}
+
+#####################
+
+scalar DateTime
+
+enum Priority {
+  highest
+  high
+  medium
+  low
+  lowest
+}
+
+enum Sort {
+  asc
+  desc
+}
+
+input ToDoOrderByInput {
+  description: Sort
+  dueDate: Sort
+  priority: Sort
+  heuristicPriority: Sort
+}
+
+#####################
+
+type AuthPayload {
+  token: String
+  user: User
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  toDos: [ToDo!]!
+}
+
+type ToDo {
+  description: String!
+  dueDate: DateTime
+  priority: Priority
+  heuristicPriority: Float
+}
+
+type Feed {
+  id: ID!
+  toDos: [ToDo!]!
+}
