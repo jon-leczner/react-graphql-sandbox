@@ -14,55 +14,44 @@ const { getUserId } = require('./utils');
 const pubsub = new PubSub();
 
 const prisma = new PrismaClient({
-  errorFormat: 'minimal'
+    errorFormat: 'minimal',
 });
 
 const resolvers = {
-  Query,
-  Mutation,
-  Subscription,
-  User,
-  ToDo
+    Query,
+    Mutation,
+    Subscription,
+    User,
+    ToDo,
 };
 
 const server = new ApolloServer({
-  typeDefs: fs.readFileSync(
-    path.join(__dirname, 'schema.graphql'),
-    'utf8'
-  ),
-  resolvers,
-  context: ({ req }) => {
-    return {
-      ...req,
-      prisma,
-      pubsub,
-      userId:
-        req && req.headers.authorization
-          ? getUserId(req)
-          : null
-    };
-  },
-  subscriptions: {
-    onConnect: (connectionParams) => {
-      if (connectionParams.authToken) {
+    typeDefs: fs.readFileSync(path.join(__dirname, 'schema.graphql'), 'utf8'),
+    resolvers,
+    context: ({ req }) => {
         return {
-          prisma,
-          userId: getUserId(
-            null,
-            connectionParams.authToken
-          )
+            ...req,
+            prisma,
+            pubsub,
+            userId: req && req.headers.authorization ? getUserId(req) : null,
         };
-      } else {
-        return {
-          prisma
-        };
-      }
-    }
-  }
+    },
+    subscriptions: {
+        onConnect: (connectionParams) => {
+            if (connectionParams.authToken) {
+                return {
+                    prisma,
+                    userId: getUserId(null, connectionParams.authToken),
+                };
+            } else {
+                return {
+                    prisma,
+                };
+            }
+        },
+    },
 });
 
-server
-  .listen()
-  .then(({ url }) =>
-    console.log(`Server is running on ${url}`)
-  );
+server.listen().then(async ({ url }) => {
+    console.log(`Server is running on ${url}`);
+});

@@ -1,25 +1,22 @@
 type Query {
-  # info: String!
-  feed(
-    # filter: String
-    skip: Int
-    take: Int
-    orderBy: ToDoOrderByInput
-  ): Feed!
+    # info: String!
+    feed(
+        # filter: String
+        skip: Int
+        take: Int
+        orderBy: ToDoOrderByInput
+    ): Feed!
+    users: [User!]!
 }
 
 type Mutation {
-  post(description: String!): ToDo!
-  signup(
-    email: String!
-    password: String!
-    name: String!
-  ): AuthPayload
-  login(email: String!, password: String!): AuthPayload
+    post(description: String!): ToDo!
+    signup(email: String!, password: String!, name: String!): AuthPayload
+    login(email: String!, password: String!): AuthPayload
 }
 
 type Subscription {
-  newToDo: ToDo
+    newToDo: ToDo
 }
 
 #####################
@@ -27,47 +24,51 @@ type Subscription {
 scalar DateTime
 
 enum Priority {
-  highest
-  high
-  medium
-  low
-  lowest
+    highest
+    high
+    medium
+    low
+    lowest
 }
 
 enum Sort {
-  asc
-  desc
+    asc
+    desc
 }
 
 input ToDoOrderByInput {
-  description: Sort
-  dueDate: Sort
-  priority: Sort
-  heuristicPriority: Sort
+    description: Sort
+    dueDate: Sort
+    priority: Sort
+    heuristicPriority: Sort
 }
 
 #####################
 
 type AuthPayload {
-  token: String
-  user: User
+    token: String
+    user: User
 }
 
 type User {
-  id: ID!
-  name: String!
-  email: String!
-  toDos: [ToDo!]!
+    id: ID!
+    name: String!
+    email: String!
+    toDos: [ToDo!]!
 }
 
 type ToDo {
-  description: String!
-  dueDate: DateTime
-  priority: Priority
-  heuristicPriority: Float
+    id: ID!
+    postedBy: User
+    description: String!
+    createdAt: DateTime!
+    dueDate: DateTime
+    priority: Priority
+    heuristicPriority: Float
 }
 
 type Feed {
-  id: ID!
-  toDos: [ToDo!]!
+    userId: ID!
+    toDos: [ToDo!]!
+    count: Int!
 }

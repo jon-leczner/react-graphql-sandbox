@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-import ToDo from './ToDo'
+import ToDo from './ToDo';
 
 const Feed = () => {
     const toDos = [
@@ -16,7 +16,7 @@ const Feed = () => {
             priority: 'high',
             dueDate: new Date(),
         },
-    ]
+    ];
 
     return (
         <div>
@@ -24,7 +24,7 @@ const Feed = () => {
                 <ToDo key={toDo.id} toDo={toDo} />
             ))}
         </div>
-    )
-}
+    );
+};
 
-export default Feed
+export default Feed;

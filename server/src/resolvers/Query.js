@@ -1,29 +1,34 @@
 async function feed(parent, args, context, info) {
-  // const where = args.filter
-  //   ? {
-  //       OR: [
-  //         { description: { contains: args.filter } },
-  //         { url: { contains: args.filter } }
-  //       ]
-  //     }
-  //   : {};
+    // const where = args.filter
+    //   ? {
+    //       OR: [
+    //         { description: { contains: args.filter } },
+    //         { url: { contains: args.filter } }
+    //       ]
+    //     }
+    //   : {};
 
-  const toDos = await context.prisma.todo.findMany({
-    // where,
-    skip: args.skip,
-    take: args.take,
-    orderBy: args.orderBy
-  });
+    const toDos = await context.prisma.toDo.findMany({
+        // where,
+        skip: args.skip,
+        take: args.take,
+        orderBy: args.orderBy,
+    });
 
-  const count = await context.prisma.todo.count();
+    const count = await context.prisma.toDo.count();
 
-  return {
-    id: 'main-feed',
-    toDos,
-    count
-  };
+    return {
+        id: 'main-feed',
+        toDos,
+        count,
+    };
+}
+
+async function users(parent, args, context, info) {
+    return await context.prisma.user.findMany();
 }
 
 module.exports = {
-  feed
+    feed,
+    users,
 };
