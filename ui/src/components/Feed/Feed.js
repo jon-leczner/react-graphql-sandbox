@@ -1,28 +1,42 @@
 import React from 'react';
+import { useQuery, gql } from '@apollo/client';
 
-import ToDo from './ToDo';
+import ToDoTable from './ToDoTable';
+
+export const FEED_QUERY = gql`
+    query FeedQuery($take: Int, $skip: Int, $orderBy: ToDoOrderByInput) {
+        feed(take: $take, skip: $skip, orderBy: $orderBy) {
+            toDos {
+                id
+                createdAt
+                description
+                dueDate
+                heuristicPriority
+                priority
+            }
+        }
+    }
+`;
 
 const Feed = () => {
-    const toDos = [
-        {
-            id: 0,
-            description: 'Something',
-            priority: 'highest',
-            dueDate: new Date(),
+    const { loading, error, data } = useQuery(FEED_QUERY, {
+        variables: {
+            take: 100,
+            skip: 0,
+            orderBy: { createdAt: 'desc' },
         },
-        {
-            id: 1,
-            description: 'Something else',
-            priority: 'high',
-            dueDate: new Date(),
-        },
-    ];
+    });
+
+    if (loading) {
+        return <p>Loading...</p>;
+    }
+    if (error) {
+        return <p>Error: {JSON.stringify(error)}</p>;
+    }
 
     return (
-        <div>
-            {toDos.map((toDo) => (
-                <ToDo key={toDo.id} toDo={toDo} />
-            ))}
+        <div style={{ width: '90%', padding: 25 }}>
+            <ToDoTable toDos={data.feed.toDos} />
         </div>
     );
 };
