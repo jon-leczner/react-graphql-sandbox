@@ -37,6 +37,7 @@ enum Sort {
 }
 
 input ToDoOrderByInput {
+    createdAt: Sort
     description: Sort
     dueDate: Sort
     priority: Sort

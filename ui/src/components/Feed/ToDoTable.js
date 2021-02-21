@@ -1,12 +1,18 @@
 import React, { Component } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 
+import ActionButtons from './ActionButtons';
+
 class ToDoTable extends Component {
     state = {
         columnDefs: [
             {
                 field: 'description',
                 autoHeight: true,
+                valueSetter: (params) => {
+                    params.data.description = params.newValue;
+                    return true;
+                },
             },
             {
                 field: 'priority',
@@ -22,16 +28,27 @@ class ToDoTable extends Component {
                 field: 'createdAt',
                 editable: false,
             },
+            {
+                cellRenderer: 'actionButtonsRenderer',
+                cellRendererParams: (params) => {
+                    return {
+                        toggleEdit: this.toggleEdit,
+                        save: this.save,
+                    };
+                },
+                editable: false,
+            },
         ],
         defaultColumnDef: {
             editable: true,
             resizable: true,
         },
-        getRowNodeId: (data) => data.id,
         gridOptions: {
-            immutableData: true,
+            frameworkComponents: {
+                actionButtonsRenderer: ActionButtons,
+            },
+            rowSelection: 'single',
         },
-        toDos: this.props.toDos,
     };
 
     onGridReady = (params) => {
@@ -41,13 +58,27 @@ class ToDoTable extends Component {
         this.gridApi.sizeColumnsToFit();
     };
 
+    toggleEdit = (node, isEditEnabled) => {
+        if (isEditEnabled) {
+            this.gridApi.stopEditing(true);
+        } else {
+            this.gridApi.startEditingCell({
+                colKey: 'description',
+                rowIndex: node.rowIndex,
+            });
+        }
+    };
+
+    save = (node) => {
+        // graphql mutation to update toDo
+        // refresh grid ?
+        const data = node.data;
+        console.log(data);
+        this.gridApi.stopEditing();
+    };
+
     render() {
-        const {
-            columnDefs,
-            defaultColumnDef,
-            getRowNodeId,
-            gridOptions,
-        } = this.state;
+        const { columnDefs, defaultColumnDef, gridOptions } = this.state;
         const { toDos } = this.props;
 
         return (
@@ -58,10 +89,11 @@ class ToDoTable extends Component {
                 <AgGridReact
                     columnDefs={columnDefs}
                     defaultColDef={defaultColumnDef}
-                    getRowNodeId={getRowNodeId}
+                    editType={'fullRow'}
                     gridOptions={gridOptions}
                     onGridReady={this.onGridReady}
                     rowData={toDos}
+                    suppressClickEdit={true}
                 />
             </div>
         );

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
+import { cloneDeep } from 'lodash';
 
 import ToDoTable from './ToDoTable';
 
@@ -34,9 +35,11 @@ const Feed = () => {
         return <p>Error: {JSON.stringify(error)}</p>;
     }
 
+    const mutableData = cloneDeep(data);
+
     return (
         <div style={{ width: '90%', padding: 25 }}>
-            <ToDoTable toDos={data.feed.toDos} />
+            <ToDoTable toDos={mutableData.feed.toDos} />
         </div>
     );
 };

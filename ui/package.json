@@ -17,6 +17,9 @@
     "subscriptions-transport-ws": "^0.9.18",
     "web-vitals": "^0.2.4"
   },
+  "devDependencies": {
+    "lodash": "^4.17.21"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
