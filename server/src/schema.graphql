@@ -11,6 +11,7 @@ type Query {
 
 type Mutation {
     post(description: String!): ToDo!
+    updateToDo(id: ID!, input: ToDoInput!): ToDo!
     signup(email: String!, password: String!, name: String!): AuthPayload
     login(email: String!, password: String!): AuthPayload
 }
@@ -24,16 +25,22 @@ type Subscription {
 scalar DateTime
 
 enum Priority {
-    highest
-    high
-    medium
-    low
-    lowest
+    Highest
+    High
+    Medium
+    Low
+    Lowest
 }
 
 enum Sort {
     asc
     desc
+}
+
+input ToDoInput {
+    description: String
+    dueDate: DateTime
+    priority: Priority
 }
 
 input ToDoOrderByInput {
@@ -60,12 +67,13 @@ type User {
 
 type ToDo {
     id: ID!
-    postedBy: User
-    description: String!
     createdAt: DateTime!
+    description: String!
     dueDate: DateTime
-    priority: Priority
     heuristicPriority: Float
+    postedBy: User
+    postedById: ID
+    priority: Priority
 }
 
 type Feed {

@@ -70,11 +70,20 @@ class ToDoTable extends Component {
     };
 
     save = (node) => {
-        // graphql mutation to update toDo
-        // refresh grid ?
-        const data = node.data;
-        console.log(data);
         this.gridApi.stopEditing();
+
+        const { id, description, dueDate, priority } = node.data;
+
+        this.props.updateToDo({
+            variables: {
+                id: id,
+                input: {
+                    description: description,
+                    dueDate: dueDate,
+                    priority: priority,
+                },
+            },
+        });
     };
 
     render() {

@@ -16,6 +16,21 @@ function post(parent, args, context, info) {
     return newToDo;
 }
 
+function updateToDo(parent, args, context, info) {
+    const { userId } = context;
+
+    console.log(args);
+
+    const updatedToDo = context.prisma.toDo.update({
+        where: {
+            id: args.id,
+        },
+        data: { ...args.input },
+    });
+
+    return updatedToDo;
+}
+
 async function signup(parent, args, context, info) {
     const password = await bcrypt.hash(args.password, 10);
     const user = await context.prisma.user.create({
@@ -53,6 +68,7 @@ async function login(parent, args, context, info) {
 
 module.exports = {
     post,
+    updateToDo,
     signup,
     login,
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, useMutation, gql } from '@apollo/client';
 import { cloneDeep } from 'lodash';
 
 import ToDoTable from './ToDoTable';
@@ -19,6 +19,17 @@ export const FEED_QUERY = gql`
     }
 `;
 
+export const UPDATE_TODO_MUTATION = gql`
+    mutation UpdateToDo($id: ID!, $input: ToDoInput!) {
+        updateToDo(id: $id, input: $input) {
+            id
+            description
+            dueDate
+            priority
+        }
+    }
+`;
+
 const Feed = () => {
     const { loading, error, data } = useQuery(FEED_QUERY, {
         variables: {
@@ -27,6 +38,8 @@ const Feed = () => {
             orderBy: { createdAt: 'desc' },
         },
     });
+
+    const [updateToDo] = useMutation(UPDATE_TODO_MUTATION);
 
     if (loading) {
         return <p>Loading...</p>;
@@ -39,7 +52,7 @@ const Feed = () => {
 
     return (
         <div style={{ width: '90%', padding: 25 }}>
-            <ToDoTable toDos={mutableData.feed.toDos} />
+            <ToDoTable toDos={mutableData.feed.toDos} updateToDo={updateToDo} />
         </div>
     );
 };
