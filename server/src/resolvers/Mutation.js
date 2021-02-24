@@ -2,12 +2,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { APP_SECRET } = require('../utils');
 
-function post(parent, args, context, info) {
+function createToDo(parent, args, context, info) {
     const { userId } = context;
 
     const newToDo = context.prisma.toDo.create({
         data: {
-            description: args.description,
+            ...args.input,
             postedBy: { connect: { id: userId } },
         },
     });
@@ -17,10 +17,6 @@ function post(parent, args, context, info) {
 }
 
 function updateToDo(parent, args, context, info) {
-    const { userId } = context;
-
-    console.log(args);
-
     const updatedToDo = context.prisma.toDo.update({
         where: {
             id: args.id,
@@ -29,6 +25,16 @@ function updateToDo(parent, args, context, info) {
     });
 
     return updatedToDo;
+}
+
+function deleteToDo(parent, args, context, info) {
+    const toDoToDelete = context.prisma.toDo.delete({
+        where: {
+            id: args.id,
+        },
+    });
+
+    return toDoToDelete;
 }
 
 async function signup(parent, args, context, info) {
@@ -67,8 +73,9 @@ async function login(parent, args, context, info) {
 }
 
 module.exports = {
-    post,
+    createToDo,
     updateToDo,
+    deleteToDo,
     signup,
     login,
 };

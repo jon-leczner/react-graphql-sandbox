@@ -3,6 +3,8 @@ import { AgGridReact } from 'ag-grid-react';
 
 import ActionButtons from './ActionButtons';
 
+import cuid from 'cuid';
+
 class ToDoTable extends Component {
     state = {
         columnDefs: [
@@ -34,14 +36,18 @@ class ToDoTable extends Component {
                     return {
                         toggleEdit: this.toggleEdit,
                         save: this.save,
+                        deleteToDo: this.deleteToDo,
                     };
                 },
                 editable: false,
+                resizable: false,
+                sortable: false,
             },
         ],
         defaultColumnDef: {
             editable: true,
             resizable: true,
+            sortable: true,
         },
         gridOptions: {
             frameworkComponents: {
@@ -49,6 +55,11 @@ class ToDoTable extends Component {
             },
             rowSelection: 'single',
         },
+        isNewRowPending: false,
+    };
+
+    getRowNodeId = (data) => {
+        return data.id;
     };
 
     onGridReady = (params) => {
@@ -56,6 +67,16 @@ class ToDoTable extends Component {
         this.gridColumnApi = params.columnApi;
 
         this.gridApi.sizeColumnsToFit();
+        this.gridApi.addEventListener('rowEditingStarted', this.onEditStart);
+        this.gridApi.addEventListener('rowEditingStopped', this.onEditStop);
+    };
+
+    onEditStart = () => {
+        this.setState({ isNewRowPending: true });
+    };
+
+    onEditStop = () => {
+        this.setState({ isNewRowPending: false });
     };
 
     toggleEdit = (node, isEditEnabled) => {
@@ -63,8 +84,8 @@ class ToDoTable extends Component {
             this.gridApi.stopEditing(true);
         } else {
             this.gridApi.startEditingCell({
-                colKey: 'description',
                 rowIndex: node.rowIndex,
+                colKey: 'description',
             });
         }
     };
@@ -74,36 +95,84 @@ class ToDoTable extends Component {
 
         const { id, description, dueDate, priority } = node.data;
 
-        this.props.updateToDo({
+        const variables = {
             variables: {
-                id: id,
+                id,
                 input: {
-                    description: description,
-                    dueDate: dueDate,
-                    priority: priority,
+                    description,
+                    dueDate,
+                    priority,
                 },
             },
-        });
+        };
+
+        const toDoExists =
+            this.props.toDos.findIndex((toDo) => toDo.id === id) !== -1;
+
+        if (toDoExists) {
+            this.props.updateToDo(variables);
+        } else {
+            this.props.createToDo(variables);
+        }
+
+        this.props.refreshToDos();
+    };
+
+    deleteToDo = (node) => {
+        this.gridApi.stopEditing();
+        this.gridApi.applyTransaction({ remove: [node] });
+        this.props.deleteToDo({ variables: { id: node.id } });
+    };
+
+    addRow = () => {
+        const id = cuid();
+        const newRow = { id };
+
+        this.gridApi.applyTransaction({ add: [newRow] });
+
+        const node = this.gridApi.getRowNode(id);
+
+        this.gridApi.ensureIndexVisible(node.rowIndex);
+        setTimeout(() => {
+            // timeout ensures the new row is added before editing starts
+            this.gridApi.startEditingCell({
+                rowIndex: node.rowIndex,
+                colKey: 'description',
+            });
+        }, 300);
     };
 
     render() {
-        const { columnDefs, defaultColumnDef, gridOptions } = this.state;
+        const {
+            columnDefs,
+            defaultColumnDef,
+            gridOptions,
+            isNewRowPending,
+        } = this.state;
+
         const { toDos } = this.props;
 
         return (
-            <div
-                className="ag-theme-material"
-                style={{ height: 400, width: '100%' }}
-            >
-                <AgGridReact
-                    columnDefs={columnDefs}
-                    defaultColDef={defaultColumnDef}
-                    editType={'fullRow'}
-                    gridOptions={gridOptions}
-                    onGridReady={this.onGridReady}
-                    rowData={toDos}
-                    suppressClickEdit={true}
-                />
+            <div>
+                <div className="ag-theme-alpine todo-table-container">
+                    <AgGridReact
+                        columnDefs={columnDefs}
+                        defaultColDef={defaultColumnDef}
+                        editType={'fullRow'}
+                        getRowNodeId={this.getRowNodeId}
+                        gridOptions={gridOptions}
+                        onGridReady={this.onGridReady}
+                        rowData={toDos}
+                        suppressClickEdit={true}
+                    />
+                </div>
+                <button
+                    className="new-todo-button"
+                    disabled={isNewRowPending}
+                    onClick={this.addRow}
+                >
+                    New
+                </button>
             </div>
         );
     }

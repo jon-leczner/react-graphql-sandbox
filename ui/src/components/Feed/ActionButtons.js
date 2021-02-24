@@ -1,7 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const ActionButtons = ({ toggleEdit, save, node }) => {
+const ActionButtons = ({ toggleEdit, save, deleteToDo, node, api }) => {
     const [isEditEnabled, setIsEditEnabled] = useState(false);
+    const [areButtonsDisabled, setAreButtonsDisabled] = useState(false);
+
+    useEffect(() => {
+        api.addEventListener('rowEditingStarted', onEditStart);
+        api.addEventListener('rowEditingStopped', onEditStop);
+
+        return () => {
+            api.removeEventListener('rowEditingStarted', onEditStart);
+            api.removeEventListener('rowEditingStopped', onEditStop);
+        };
+    });
+
+    const onEditStart = (params) => {
+        if (params.node === node) {
+            setIsEditEnabled(true);
+        } else {
+            setAreButtonsDisabled(true);
+        }
+    };
+
+    const onEditStop = (params) => {
+        if (params.node === node) {
+            if (!node.data.description) {
+                api.applyTransaction({ remove: [node] });
+            } else {
+                setIsEditEnabled(false);
+            }
+        } else {
+            setAreButtonsDisabled(false);
+        }
+    };
 
     const handleToggleEdit = (event) => {
         setIsEditEnabled((isEditEnabled) => !isEditEnabled);
@@ -13,12 +44,24 @@ const ActionButtons = ({ toggleEdit, save, node }) => {
         save(node);
     };
 
+    const handleDelete = (event) => {
+        setIsEditEnabled(false);
+        deleteToDo(node);
+    };
+
     return (
-        <div>
-            <button onClick={handleToggleEdit}>
+        <div className="action-buttons-container">
+            <button onClick={handleToggleEdit} disabled={areButtonsDisabled}>
                 {isEditEnabled ? 'Cancel' : 'Edit'}
             </button>
-            <button onClick={handleSave}>Save</button>
+            {isEditEnabled ? (
+                <button onClick={handleSave} disabled={areButtonsDisabled}>
+                    Save
+                </button>
+            ) : null}
+            <button onClick={handleDelete} disabled={areButtonsDisabled}>
+                Delete
+            </button>
         </div>
     );
 };

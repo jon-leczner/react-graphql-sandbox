@@ -10,8 +10,9 @@ type Query {
 }
 
 type Mutation {
-    post(description: String!): ToDo!
+    createToDo(id: ID!, input: ToDoInput!): ToDo!
     updateToDo(id: ID!, input: ToDoInput!): ToDo!
+    deleteToDo(id: ID!): ToDo!
     signup(email: String!, password: String!, name: String!): AuthPayload
     login(email: String!, password: String!): AuthPayload
 }

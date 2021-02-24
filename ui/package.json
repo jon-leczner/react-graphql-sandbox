@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^12.6.3",
     "ag-grid-community": "^25.0.1",
     "ag-grid-react": "^25.0.1",
+    "cuid": "^2.1.8",
     "graphql": "^15.5.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

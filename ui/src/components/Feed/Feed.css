@@ -1,0 +1,20 @@
+.feed-container {
+    width: 90%;
+}
+
+.todo-table-container {
+    height: 500px;
+    width: 100%;
+}
+
+.new-todo-button {
+    padding: 8px;
+    width: 100%;
+}
+
+.action-buttons-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 40px;
+}
